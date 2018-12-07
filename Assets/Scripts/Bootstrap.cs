@@ -19,6 +19,7 @@ namespace PureECSVoxels
         public static Mesh meshToVoxelise;
         public static Material materialToVoxelise;
         public static GameObject[] boneList;
+        public static List<Vector3> verts;
 
         public struct BonesGroup
         {
@@ -37,7 +38,7 @@ namespace PureECSVoxels
 
             meshArchetype = eManager.CreateArchetype(typeof(Position), typeof(Rotation), typeof(Voxelise));
 
-            voxelArchetype = eManager.CreateArchetype(typeof(Position), typeof(Rotation), typeof(Scale), typeof(Rotate), typeof(Voxelise), typeof(BoxCollider), typeof(Transform));
+            voxelArchetype = eManager.CreateArchetype(typeof(Position), typeof(Rotation), typeof(Scale), typeof(Rotate), typeof(Voxelise), typeof(BoxCollider), typeof(Transform), typeof(Rigidbody));
             
 
             
@@ -57,20 +58,39 @@ namespace PureECSVoxels
 
             var mesh = meshLook.mesh;
 
-            List<Vector3> verts = new List<Vector3>(mesh.vertices);
+            verts = new List<Vector3>(mesh.vertices);
 
             boneList = GameObject.FindGameObjectsWithTag("EditorOnly");
 
             for (int i = 0; i < verts.Count; i++)
             {
+                
+                if(CloseToAnyVert(verts[i]))
+                {
+                    var vox = eManager.CreateEntity(voxelArchetype);
+                    eManager.SetComponentData(vox, new Position { Value = verts[i] });
+                    eManager.SetComponentData(vox, new Scale { Value = new float3(0.05f, 0.05f, 0.05f)});
+                    eManager.AddSharedComponentData(vox, voxelLook);
 
-                var vox = eManager.CreateEntity(voxelArchetype);
-                eManager.SetComponentData(vox, new Position { Value = verts[i] });
-                eManager.SetComponentData(vox, new Scale { Value = new float3(0.05f, 0.05f, 0.05f)});
-                eManager.AddSharedComponentData(vox, voxelLook);
+                }
+                
 
                
             }
+
+        }
+
+        public static bool CloseToAnyVert(Vector3 check)
+        {
+            bool isFar = true;
+            foreach(Vector3 vert in verts)
+            {
+                if(Vector3.Distance(vert, check) < 0.05f)
+                {
+                    //isFar = false;
+                }
+            }
+            return isFar;
 
         }
 
