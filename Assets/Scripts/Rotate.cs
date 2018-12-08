@@ -4,9 +4,9 @@ using Unity.Entities;
 using UnityEngine;
 using Unity.Transforms;
 
-public class Rotate
+public class Rotate : MonoBehaviour
 {
-
+    public float speed;
     
 
 }
